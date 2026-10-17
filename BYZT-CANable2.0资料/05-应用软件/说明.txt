@@ -1,0 +1,6 @@
+
+(1) cangaroo-win32-ccdcb64.zip  		官方应用，支持candleLight和 slcan fd
+
+(2) BUSMASTER_Installer_Ver_3.2.2-cantact.zip	支持candleLight
+
+(3) TSMaster.zip				支持candleLight

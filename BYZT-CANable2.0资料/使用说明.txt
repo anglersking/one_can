@@ -1,0 +1,23 @@
+
+canable2.0版本的板子支持slcan和candleLight固件，在win10系统不需要驱动，板子发货前默认烧好slcan固件。
+
+接板子到电脑上，在设备管理器可以看到一个串口设备，比如我的是COM4 :  USB 串行设备(COM4)	
+
+解压提供的资料：05-应用软件\cangaroo-win32-ccdcb64.zip  ，并打开： cangaroo-win32-ccdcb64\cangaroo.exe ,
+
+然后在打开的 cangaroo软件窗口点击： Measurement -> Start Measurement , 
+
+在弹出的 Network1 窗口 的 Interfaces 中，点选对应的串口号，
+
+接着选择好 ：
+
+	Bittrate: 500000  		(默认是500K，也可以选其他速率)
+	CanFD Bitrate: 2000000 	(默认是2M，可选5M)，
+
+需要DBC文件来解析的，可以在弹出的 Network1 窗口 的 Can Databases 中, 添加DBC文件，不需要的可以直接跳过这里。
+
+接着点 OK 就可以接收发送信息了。
+
+发送数据时，要注意选好 DLC 的数据长度。
+
+

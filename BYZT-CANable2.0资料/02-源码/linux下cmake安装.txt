@@ -1,0 +1,10 @@
+
+sudo apt-get autoremove cmake
+
+cd /usr/src
+wget https://github.com/Kitware/CMake/releases/download/v3.16.0/cmake-3.16.0.tar.gz
+tar -zxvf cmake-3.16.0.tar.gz
+cd cmake-3.16.0
+apt install libssl-dev build-essential
+
+./bootstrap && make && sudo make install

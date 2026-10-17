@@ -1,0 +1,78 @@
+
+(1) 内核配置驱动支持：
+
+     # make ARCH=arm64 menuconfig		(or make ARCH=arm menuconfig)
+
+	[*] Networking support  --->
+		<*>   CAN bus subsystem support  ---> 
+			CAN Device Drivers  --->  
+				CAN USB interfaces  --->
+					<*> Serial / USB serial CAN Adaptors (slcan)
+
+内核配置驱动之后， 板子烧了slcan固件之后，接入嵌入式设备的USB口，会发现下面的信息，
+
+[root@RK356X:/]# [   23.890745] usb 3-1: new full-speed USB device number 2 using ohci-platform
+[   24.109136] usb 3-1: device descriptor read/all, error -62
+[   24.287404] usb 3-1: new full-speed USB device number 3 using ohci-platform
+[   24.480738] usb 3-1: device descriptor read/64, error -62
+[   24.819141] usb 3-1: New USB device found, idVendor=ad50, idProduct=60c4, bcdDevice= 2.00
+[   24.819161] usb 3-1: New USB device strings: Mfr=1, Product=2, SerialNumber=3
+[   24.819169] usb 3-1: Product: CANable 2022 0726
+[   24.819176] usb 3-1: Manufacturer: Protofusion Labs
+[   24.819183] usb 3-1: SerialNumber: 004C002B5550531620303731
+[   24.824832] cdc_acm 3-1:1.0: ttyACM0: USB ACM device						（注意得到 ttyACM0 设备）
+[   24.825910] pwm-backlight backlight1: backlight1 supply power not found, using dummy regulator
+[   24.825983] pwm-backlight backlight1: Linked as a consumer to regulator.0
+[   24.826039] pwm-backlight backlight1: Dropping the link to regulator.0
+[   32.060758] vcc3v3_lcd0_n: disabling
+[   32.060792] vcc3v3_lcd1_n: disabling
+[   32.060801] vcc3v3_pcie: disabling
+
+可以查看到设备： 
+
+	# ls /dev/ttyACMx       (x代表可能是 0，1，2，3，.......)
+
+(2) 用移植好的 can-utils 测试工具来测试 can: （请自行参考网上相关教程移植can-utils）
+
+     ttyACMx 设备映射为 can 设备，比如我这里 ttyACM0 映射为 can0，并设置速率:
+
+	# slcand -o -c -s6 /dev/ttyACM0 can0		(-s6 = 500k  速率为500K)
+
+    可查看到设备（输入命令：ifconfig -a）：
+
+[root@RK356X:/]# ifconfig -a
+
+can0    Link encap:UNSPEC  HWaddr 00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00  
+          UP RUNNING NOARP  MTU:16  Metric:1
+          RX packets:3845 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:7 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000 
+          RX bytes:0 (0.0 KiB)  TX bytes:0 (0.0 B)
+
+接着可以对slcan0 设备进行操作：
+
+	# ifconfig can0 up				# 启动can0
+	# ifconfig can0 txqueuelen 1000		# 配置txqueuelen的传输数据的缓冲区的存储长度
+
+	# cansend can0 999#DEADBEEF   		# can0发送ID为0x999的数据0xdeadbeef
+	# candump can0                			# can0接收数据
+	# canbusload can0 500000      			# 计算can0上的总线负载百分比
+	# cansniffer can0             			# 显示can流量的视图
+	# cangen can0 -D 11223344DEADBEEF -L 8    	# 生成固定数据CAN0消息发送,主要用于测试
+
+其中： slcand -o -c -s6 /dev/ttyACM0 can0  命令中的 -s6代表 500速率，其他速率参考：
+
+-s0 = 10k
+-s1 = 20k
+-s2 = 50k
+-s3 = 100k
+-s4 = 125k
+-s5 = 250k
+-s6 = 500k
+-s7 = 750k
+-s8 = 1M
+
+
+
+
+

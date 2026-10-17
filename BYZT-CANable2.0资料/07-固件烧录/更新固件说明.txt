@@ -1,0 +1,56 @@
+
+使用STLINK来烧：（强烈建议使用这种方法来烧固件）
+
+	注意，有些芯片对dfu不支持，或者是使用dfu烧写之后，就不能再进入dfu烧写了，或者是不能识别到DFU设备，这时可以使用其他工具如 stlink 来烧录，
+
+	结合烧录软件 STM32CubeProgrammer 或者STM32 ST-LINK Utility 来烧。
+
+
+通过USB更新固件有两种方法：
+
+（1）网页更新固件：
+
+	板子用镊子短接BOOT0,用TYPEC线接到电脑上，电脑设备管理器可以看到这样的设备：DFU in FS Mode
+
+	这时点击   04-烧录驱动及工具\ImpulseRC_Driver_Fixer.exe 来安装驱动，装完之后，会发现设备：
+
+	设备管理器-》通用串行总线设备-》DFU in FS Mode
+
+	打开网页： https://canable.io/updater/canable2.html
+
+	点击 Connect and Update，弹出的对话框中选中  DFU in FS Mode-已配对，然后再点击连接即可烧录固件。
+
+
+（2）使用STM32的DFU工具烧录：
+
+	先解压： 04-烧录驱动及工具\DfuSe_Demo.rar 后点击 DfuSe_Demo_V3.0.6_Setup.exe 安装 ，装完之后，
+
+	板子用镊子短接BOOT0,用TYPEC线接到电脑上， 如果已经安装了 ImpulseRC_Driver_Fixer.exe 的话，需要在
+
+	设备管理器-》通用串行总线设备-》DFU in FS Mode  点击右键 卸载设备。接着板子断电，短接BOOT0，再上电，
+
+	这时电脑设备管理器可以看到这样的设备：DFU in FS Mode，点击右键，更新驱动程序，然后定位到安装的 DfuSe_Demo 目录，
+
+	比如我这里装在：C:\Program Files (x86)\STMicroelectronics\Software\DfuSe v3.0.6\Bin\Driver
+
+	来安装，安装完之后，在 设备管理器-》通用串行总线控制器-》STM Device in DFU Mode
+
+	之后可以使用  DfuSe_Demo 来更新dfu固件。
+
+	打开电脑： 开始-》STMicroelectronics-> DfuSeDemo,在弹出的对话框中，确认 Available DFU Devieces,然后点击
+
+	Upgrade or Verify Action下的 Choose, 
+
+	选上固件： 03-固件\slcan\canable2-b158aa7.dfu（或 03-固件\candlelight\canable2_fw-ba6b1dd.dfu）
+
+	然后点击  Upgrade ，弹出的对话框点击  是   来更新固件，更新完固件断电，断开 BOOT0，再上电就可以使用了。
+	
+		
+	注意，要想再使用网页烧录固件，必须把：设备管理器-》通用串行总线控制器-》STM Device in DFU Mode  点击右键 卸载设备，
+
+	          再重新短接BOOT0上电启动，确然设备管理器看到的是  DFU in FS Mode  才可以。
+
+
+
+
+

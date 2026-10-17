@@ -1,0 +1,17 @@
+
+    sudo apt-get install can-utils			 （linux系统安装  can-utils，如果是嵌入式系统，需要移植can-utils工具）
+
+    sudo ip link set can0 type can bitrate 500000	（设置can波特率为 500k）
+
+    sudo ifconfig can0 up			（启动can）
+    sudo ifconfig can0 txqueuelen 1000		（配置txqueuelen的传输数据的缓冲区的存储长度）
+
+    sudo ifconfig can0 down			（关闭can）
+
+    cansend can0 999#DEADBEEF  		# Send a frame to 0x999 with payload 0xdeadbeef（can0发送ID为0x999的数据0xdeadbeef）
+    candump can0                			# Show all traffic received by can0		(can0接收数据)
+
+
+    canbusload can0 500000      			# Calculate bus loading percentage on can0 
+    cansniffer can0             			# Display top-style view of can traffic	
+    cangen can0 -D 11223344DEADBEEF -L 8    	# Generate fixed-data CAN messages	

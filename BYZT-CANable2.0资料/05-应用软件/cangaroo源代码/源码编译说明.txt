@@ -1,0 +1,18 @@
+Linux上编译：
+
+    基于ubuntu 16.04，安装如下工具：
+
+	# sudo apt-get install build-essential git qt5-qmake qtbase5-dev libnl-3-dev libnl-route-3-dev cmake qt5-default libqt5serialport5 libqt5serialport5-dev libqt5charts5 libqt5charts5-dev
+	
+    编译:
+	# qmake -qt=qt5
+	# make
+	# make install
+
+Windows上编译（不建议使用）：
+
+    安装Qt Creator
+	解压到 pcan-basic.zip 到 src/driver/PeakCanDriver/pcan-basic-api
+	确保在运行 cangaroo 时找到 PCANBasic.dll（来自“正常”32 位 Windows 版本的 pcan-basic-api/Win32 中的那个），例如将其放在与 .exe 文件相同的文件夹中。
+	如果您不想要 Peak 支持，您可以禁用驱动程序：从 src/src.pro 中删除行“win32:include($$PWD/driver/PeakCanDriver/PeakCanDriver.pri)”
+	如果您想部署 cangaroo 应用程序，请确保还包括所需的 Qt 库。对于正常的发布版本，它们是： Qt5Core.dll Qt5Gui.dll Qt5Widgets.dll Qt5Xml.dll

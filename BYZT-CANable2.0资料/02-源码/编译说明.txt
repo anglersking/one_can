@@ -1,0 +1,26 @@
+
+(1) 解压安装编译器：gcc-arm-none-eabi-5_4-2016q2-20160622-linux.tar.bz2
+
+     设置编译器生效：
+
+	export PATH=/home/yangjing/opt/tools/gcc-arm-none-eabi-5_4-2016q2/bin:$PATH
+
+(2) 确认 cmake 版本大于 3.13版本：
+
+	cmake --version
+
+     不大于 3.13版本时，参考  linux下cmake安装.txt 来安装
+
+(3) canable2-fw 源码编译：
+
+	# tar xvf canable2-fw.tar.bz2
+
+	# cd canable2-fw
+
+	# make
+	
+	编译完之后，在 build 目录下得到 canable2-b158aa7.bin 和 canable2-b158aa7.hex
+
+
+
+ 
