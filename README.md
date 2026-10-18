@@ -113,14 +113,15 @@ CAN B 上发 `0xBB`，本次未接。
 
 ### ESP32-S3 + 野火小智 CAN 收发器模块
 
-ESP32-S3 的 TWAI 可以直接接这个 SIT1042 收发器模块，跑 500k/1M 经典 CAN：
+ESP32-S3 的 TWAI 可以直接接这个 SIT1042 收发器模块，跑 500k/1M 经典 CAN。
+**当前实测未通过（2026-10-18）**：模块 `5V` 误接到 3.3V，SIT1042 需要 5V 供电；改成 `5VIN` 后待复测。
 
-- 模块 `EN` 必须接 **3.3V**（接 5V 会让 RXD 输出 5V，损坏 ESP32-S3）；
-- 模块 `5V` 接 5V，`GND` 共地；
+- 模块 `VIO`（资料里写 EN）必须接 **3.3V**；
+- 模块 `5V` 接 **5VIN / 5V**，不能接 3.3V；
 - `TXD→GPIO4`，`RXD→GPIO5`（可改）；
 - 模块 `SW1` 和 CANable 的 120Ω 各开一个，总共约 60Ω。
 
-测试代码和详细接线：[`ESP32S3-YEHUO-CAN/README.md`](ESP32S3-YEHUO-CAN/README.md)。
+测试代码、接线和原始资料：[`ESP32S3-YEHUO-CAN/README.md`](ESP32S3-YEHUO-CAN/README.md)。
 ESP32-S3 只支持经典 CAN，不支持 CAN FD。
 
 ### 一条总线带 7 个无刷电机
@@ -212,7 +213,8 @@ DLC 编码：`9=12`、`A=16`、`B=20`、`C=24`、`D=32`、`E=48`、`F=64` 字节
 │   └── examples/
 ├── ESP32S3-YEHUO-CAN/                 ESP32-S3 + 野火 SIT1042 模块经典 CAN 测试
 │   ├── README.md
-│   └── esp32s3_can_test.ino
+│   ├── esp32s3_can_test.ino
+│   └── hardware/                      模块规格、原理图、SIT1042 手册、原始资料 zip
 ├── BYZT-CANable2.0资料/               原包中的文档、原理图、固件、截图、示例
 │   ├── 01-原理图/
 │   ├── 02-源码/                       编译说明（源码包在 Releases）

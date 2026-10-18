@@ -52,6 +52,18 @@ void setup() {
 }
 
 void loop() {
+  // 总线错误恢复：bus-off 后自动恢复，避免一直 INVALID_STATE
+  twai_status_info_t status;
+  if (twai_get_status_info(&status) == ESP_OK) {
+    if (status.state == TWAI_STATE_BUS_OFF) {
+      Serial.println("BUS-OFF, recovering...");
+      twai_initiate_recovery();
+    } else if (status.state == TWAI_STATE_STOPPED) {
+      Serial.println("TWAI stopped, restarting...");
+      twai_start();
+    }
+  }
+
   // 每秒发一帧
   if (millis() - last_tx >= 1000) {
     last_tx = millis();
