@@ -111,6 +111,18 @@ CAN B 上发 `0xBB`，本次未接。
 - T-2Can 资料与硬件说明：[`T-2Can/README.md`](T-2Can/README.md)
 - 接线、实测日志、哪个节点发什么：[`T-2Can/CANABLE-T2CAN-TEST.md`](T-2Can/CANABLE-T2CAN-TEST.md)
 
+### ESP32-S3 + 野火小智 CAN 收发器模块
+
+ESP32-S3 的 TWAI 可以直接接这个 SIT1042 收发器模块，跑 500k/1M 经典 CAN：
+
+- 模块 `EN` 必须接 **3.3V**（接 5V 会让 RXD 输出 5V，损坏 ESP32-S3）；
+- 模块 `5V` 接 5V，`GND` 共地；
+- `TXD→GPIO4`，`RXD→GPIO5`（可改）；
+- 模块 `SW1` 和 CANable 的 120Ω 各开一个，总共约 60Ω。
+
+测试代码和详细接线：[`ESP32S3-YEHUO-CAN/README.md`](ESP32S3-YEHUO-CAN/README.md)。
+ESP32-S3 只支持经典 CAN，不支持 CAN FD。
+
 ### 一条总线带 7 个无刷电机
 
 **够。** 7 个节点对 CAN 来说很少，关键是控制周期和总线负载：
@@ -198,6 +210,9 @@ DLC 编码：`9=12`、`A=16`、`B=20`、`C=24`、`D=32`、`E=48`、`F=64` 字节
 │   ├── CANABLE-T2CAN-TEST.md
 │   ├── hardware/
 │   └── examples/
+├── ESP32S3-YEHUO-CAN/                 ESP32-S3 + 野火 SIT1042 模块经典 CAN 测试
+│   ├── README.md
+│   └── esp32s3_can_test.ino
 ├── BYZT-CANable2.0资料/               原包中的文档、原理图、固件、截图、示例
 │   ├── 01-原理图/
 │   ├── 02-源码/                       编译说明（源码包在 Releases）
