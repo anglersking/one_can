@@ -14,6 +14,12 @@ Linux:
 只监听（静默模式，不发帧、不应答）:
     python slcan_test.py --port COM4 --bitrate 500000 --listen 3
 
+周期发送（每 200 ms 一帧，共 50 帧）:
+    python slcan_test.py --port COM4 --bitrate 500000 --id 0x7FE --data 1122334455667788 --period 0.2 --count 50
+
+周期发送直到 Ctrl+C:
+    python slcan_test.py --port COM4 --bitrate 500000 --id 0x7FE --data 1122334455667788 --period 0.2
+
 发送 CAN FD（需要 FD 收发器，数据段默认 2M）:
     python slcan_test.py --port COM4 --bitrate 500000 --fd --id 0x123 --data 112233445566778899AABB
     python slcan_test.py --port COM4 --bitrate 500000 --fd --no-brs --id 0x123 --data 11223344
@@ -113,6 +119,9 @@ def main():
                     help="FD 数据段波特率，默认 2000000（Y2），可选 5000000（Y5）")
     ap.add_argument("--listen", type=float, default=0, help="静默监听秒数（只收不发）")
     ap.add_argument("--no-send", action="store_true", help="打开通道但不发帧")
+    ap.add_argument("--period", type=float, default=0.0, help="周期发送间隔（秒），0=只发一次")
+    ap.add_argument("--count", type=int, default=0, help="周期发送次数，0=一直发到 Ctrl+C")
+    ap.add_argument("--quiet", action="store_true", help="周期发送时不逐帧打印")
     ap.add_argument("--baud", type=int, default=115200, help="USB CDC 波特率，固件忽略，默认 115200")
     args = ap.parse_args()
 
@@ -172,9 +181,38 @@ def main():
         cmd(ser, "O")
 
         if not args.no_send:
-            ser.write(frame.encode("ascii") + b"\r")
-            ser.flush()
-            time.sleep(0.5)
+            period = max(0.0, args.period)
+            count = max(0, args.count)
+            if period == 0 and count == 0:
+                count = 1  # 默认单次发送
+
+            if period > 0:
+                print("周期发送：间隔 %.3f s，次数 %s（Ctrl+C 停止）" %
+                      (period, "无限" if count == 0 else count))
+            sent = 0
+            try:
+                while True:
+                    ser.write(frame.encode("ascii") + b"\r")
+                    ser.flush()
+                    sent += 1
+                    if not args.quiet:
+                        print("%s TX #%-6d %s" % (time.strftime("%H:%M:%S"), sent, frame))
+
+                    # 顺手收一下总线报文，避免串口缓冲堆积
+                    rx = ser.read(4096)
+                    if rx:
+                        show("RX", rx)
+
+                    if count and sent >= count:
+                        break
+                    if period > 0:
+                        time.sleep(period)
+            except KeyboardInterrupt:
+                print("\n用户中断，已发送 %d 帧" % sent)
+            except serial.SerialException as e:
+                print("\n串口异常: %s" % e, file=sys.stderr)
+
+            time.sleep(0.2)
             show("after TX", ser.read(8192))
             show("E", cmd(ser, "E"))
         else:

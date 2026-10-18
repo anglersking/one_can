@@ -31,6 +31,22 @@ python examples\slcan_test.py --port COM4 --bitrate 500000 --id 0x7FE --data 112
 python examples\slcan_test.py --port COM4 --bitrate 500000 --listen 3
 ```
 
+周期发送（每 200 ms 一帧，共 50 帧）：
+
+```powershell
+python examples\slcan_test.py --port COM4 --bitrate 500000 --id 0x7FE --data 1122334455667788 --period 0.2 --count 50
+```
+
+一直发到按 `Ctrl+C`：
+
+```powershell
+python examples\slcan_test.py --port COM4 --bitrate 500000 --id 0x7FE --data 1122334455667788 --period 0.2
+```
+
+> 周期发送默认会先发 `A0` 关闭自动重传，每帧只尝试一次。
+> 如果总线上没有节点 ACK，TX FIFO 会逐渐占满，`E` 可能变成非 0；这是正常的，接上总线或减小发送频率即可。
+> 高频发送时可以加 `--quiet` 不逐帧打印。
+
 ## Linux
 
 先确认串口：
