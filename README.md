@@ -97,6 +97,31 @@ python examples/slcan_test.py --port COM4 --bitrate 500000 --listen 3
 
 详见 [`examples/README.md`](examples/README.md)。
 
+### T-2Can（MCP2515）作为第二个节点
+
+T-2Can 的 **CAN A（P2 端子，MCP2515）** 可以和 CANable 直接互测，500 kbit/s：
+
+- 接线：`CAN_H→CANHA`、`CAN_L→CANLA`、`GND→SGNDA`；
+- CANable 收：`python examples/slcan_test.py --port COM4 --bitrate 500000 --listen-normal 20`
+- CANable 发：`python examples/slcan_test.py --port COM4 --bitrate 500000 --id 0x123 --data 1122334455667788 --period 1 --count 5`
+
+T-2Can 出厂固件在 CAN A 上发 `0xAA`（8 字节 `08 07 06 05 04 03 02 01`），每 6 秒一帧；
+CAN B 上发 `0xBB`，本次未接。
+
+- T-2Can 资料与硬件说明：[`T-2Can/README.md`](T-2Can/README.md)
+- 接线、实测日志、哪个节点发什么：[`T-2Can/CANABLE-T2CAN-TEST.md`](T-2Can/CANABLE-T2CAN-TEST.md)
+
+### 一条总线带 7 个无刷电机
+
+**够。** 7 个节点对 CAN 来说很少，关键是控制周期和总线负载：
+
+- 100–200 Hz：500 kbit/s 经典 CAN 够用（命令+反馈约 35–70% 负载）；
+- 500 Hz–1 kHz：建议 1 Mbit/s，并压缩 PDO 数量/数据长度；
+- 1 kHz 以上或每个电机传大量数据：考虑 CAN FD 或双总线；
+- 目标负载控制在 50–60% 以内，终端电阻、支线长度、共地/隔离比节点数量更重要。
+
+完整计算见 [`docs/10-seven-motors.md`](docs/10-seven-motors.md)。
+
 ---
 
 ## 三、两种固件怎么选
@@ -162,11 +187,17 @@ DLC 编码：`9=12`、`A=16`、`B=20`、`C=24`、`D=32`、`E=48`、`F=64` 字节
 │   ├── 07-win7.md                     Win7 下装驱动
 │   ├── 08-canfd.md                    CAN FD 支持分析 + 实测方法
 │   ├── 09-faq.md                      常见问题
+│   ├── 10-seven-motors.md             一条 CAN 总线带 7 个无刷电机的带宽分析
 │   ├── images/                        烧录、Win7 配置截图
 │   └── original-package-inventory.md  原始压缩包文件清单
 ├── examples/                          实测可用的 slcan 发送/监听脚本
 │   ├── slcan_test.py
 │   └── README.md
+├── T-2Can/                            LILYGO T-2Can 资料、原理图、互测记录
+│   ├── README.md
+│   ├── CANABLE-T2CAN-TEST.md
+│   ├── hardware/
+│   └── examples/
 ├── BYZT-CANable2.0资料/               原包中的文档、原理图、固件、截图、示例
 │   ├── 01-原理图/
 │   ├── 02-源码/                       编译说明（源码包在 Releases）
