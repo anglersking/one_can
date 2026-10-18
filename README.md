@@ -87,6 +87,16 @@ bus.send(can.Message(arbitration_id=0x123, data=[1, 2, 3, 4], is_extended_id=Fal
 
 示例见 [`BYZT-CANable2.0资料/09-Python-can使用/`](BYZT-CANable2.0资料/09-Python-can使用/)。注意：**python-can 的 slcan 后端不支持 CAN FD**。
 
+要直接发 slcan 帧、监听总线或测试 CAN FD，用实测过的脚本：
+
+```bash
+pip install pyserial
+python examples/slcan_test.py --port COM4 --bitrate 500000 --id 0x7FE --data 1122334455667788
+python examples/slcan_test.py --port COM4 --bitrate 500000 --listen 3
+```
+
+详见 [`examples/README.md`](examples/README.md)。
+
 ---
 
 ## 三、两种固件怎么选
@@ -154,6 +164,9 @@ DLC 编码：`9=12`、`A=16`、`B=20`、`C=24`、`D=32`、`E=48`、`F=64` 字节
 │   ├── 09-faq.md                      常见问题
 │   ├── images/                        烧录、Win7 配置截图
 │   └── original-package-inventory.md  原始压缩包文件清单
+├── examples/                          实测可用的 slcan 发送/监听脚本
+│   ├── slcan_test.py
+│   └── README.md
 ├── BYZT-CANable2.0资料/               原包中的文档、原理图、固件、截图、示例
 │   ├── 01-原理图/
 │   ├── 02-源码/                       编译说明（源码包在 Releases）

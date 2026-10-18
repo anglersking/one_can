@@ -95,6 +95,15 @@ msg = can.Message(arbitration_id=0xc0ffee, data=[0, 25, 0, 1, 3, 1, 4, 1], is_ex
 bus.send(msg)
 ```
 
+直接用 slcan 文本协议（支持 FD、可监听）的实测脚本：
+
+```bash
+pip install pyserial
+python examples/slcan_test.py --port COM4 --bitrate 500000 --id 0x7FE --data 1122334455667788
+```
+
+说明见 [`examples/README.md`](../examples/README.md)。
+
 ## 7. 常见错误
 
 | 错误 | 原因 |
