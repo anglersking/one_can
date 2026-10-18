@@ -14,6 +14,9 @@ Linux:
 只监听（静默模式，不发帧、不应答）:
     python slcan_test.py --port COM4 --bitrate 500000 --listen 3
 
+正常模式监听（会 ACK 对方，不发帧）:
+    python slcan_test.py --port COM4 --bitrate 500000 --listen-normal 10
+
 周期发送（每 200 ms 一帧，共 50 帧）:
     python slcan_test.py --port COM4 --bitrate 500000 --id 0x7FE --data 1122334455667788 --period 0.2 --count 50
 
@@ -117,7 +120,9 @@ def main():
     ap.add_argument("--no-brs", action="store_true", help="FD 帧不带 BRS")
     ap.add_argument("--data-bitrate", type=int, choices=[2000000, 5000000], default=2000000,
                     help="FD 数据段波特率，默认 2000000（Y2），可选 5000000（Y5）")
-    ap.add_argument("--listen", type=float, default=0, help="静默监听秒数（只收不发）")
+    ap.add_argument("--listen", type=float, default=0, help="静默监听秒数（只收不发，不 ACK）")
+    ap.add_argument("--listen-normal", type=float, default=0,
+                    help="正常模式监听秒数（会 ACK 对方，但不发帧）")
     ap.add_argument("--no-send", action="store_true", help="打开通道但不发帧")
     ap.add_argument("--period", type=float, default=0.0, help="周期发送间隔（秒），0=只发一次")
     ap.add_argument("--count", type=int, default=0, help="周期发送次数，0=一直发到 Ctrl+C")
@@ -152,6 +157,24 @@ def main():
         ser.reset_input_buffer()
         show("V", cmd(ser, "V"))
         show("E", cmd(ser, "E"))
+
+        if args.listen_normal > 0:
+            print("--- 正常模式监听 %.1f 秒（会 ACK，不发帧）---" % args.listen_normal)
+            cmd(ser, "C")
+            cmd(ser, "M0")
+            cmd(ser, BITRATE_CMD[args.bitrate])
+            if args.fd:
+                cmd(ser, "Y2" if args.data_bitrate == 2000000 else "Y5")
+            cmd(ser, "O")
+            end = time.time() + args.listen_normal
+            buf = b""
+            while time.time() < end:
+                chunk = ser.read(4096)
+                if chunk:
+                    buf += chunk
+            show("RX", buf)
+            cmd(ser, "C")
+            return 0
 
         if args.listen > 0:
             print("--- 静默监听 %.1f 秒 ---" % args.listen)

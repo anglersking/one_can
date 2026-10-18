@@ -31,6 +31,12 @@ python examples\slcan_test.py --port COM4 --bitrate 500000 --id 0x7FE --data 112
 python examples\slcan_test.py --port COM4 --bitrate 500000 --listen 3
 ```
 
+正常模式监听（会 ACK 对方，但不发帧，适合和第二个节点互测）：
+
+```powershell
+python examples\slcan_test.py --port COM4 --bitrate 500000 --listen-normal 15
+```
+
 周期发送（每 200 ms 一帧，共 50 帧）：
 
 ```powershell
@@ -85,7 +91,54 @@ python examples\slcan_test.py --port COM4 --bitrate 500000 --fd --no-brs --id 0x
 脚本会自动把长度映射成 DLC：`0-8` 原样，`12→9`、`16→A`、`20→B`、`24→C`、`32→D`、`48→E`、`64→F`。
 数据段默认 2M（`Y2`）；要 5M 加 `--data-bitrate 5000000`（`Y5`）。
 
-## 重要说明
+## 和 T-2Can（MCP2515）互测
+
+T-2Can 的 MCP2515 在 **CAN A** 上，接线用 P2 端子：
+
+| CANable | T-2Can P2（CAN A） |
+|---|---|
+| `CAN_H` | `CANHA` |
+| `CAN_L` | `CANLA` |
+| `GND` | `SGNDA`（隔离侧地） |
+
+- 两边都设 **500 kbit/s**。
+- 断电测 `CAN_H`-`CAN_L`，约 **60Ω** 说明两端各有一个 120Ω；如果只有 120Ω，把 CANable 的 P2 终端跳线接上。
+- T-2Can 用 USB-C 或 24V 供电，CAN 侧是隔离的；把 CANable 的 GND 接到 `SGNDA`，不要接到 24V。
+
+出厂固件上电后会先连 WiFi，最多等约 40 秒才初始化 CAN，所以上电后等一会儿。它每 3 秒轮流发：
+
+- CAN A：ID `0xAA`，8 字节 `08 07 06 05 04 03 02 01`
+- CAN B：ID `0xBB`，8 字节 `01 02 03 04 05 06 07 08`
+
+### 方向 1：T-2Can → CANable
+
+```powershell
+python examples\slcan_test.py --port COM4 --bitrate 500000 --listen-normal 15
+```
+
+用 `--listen-normal`（不是 `--listen`），因为正常模式会 ACK 对方；静默模式不 ACK，T-2Can 会发送失败/重试。
+
+预期收到类似：
+
+```text
+t0AA8 0807060504030201
+```
+
+### 方向 2：CANable → T-2Can
+
+```powershell
+python examples\slcan_test.py --port COM4 --bitrate 500000 --id 0x123 --data 1122334455667788 --period 1 --count 10
+```
+
+然后在 T-2Can 的网页日志里看：
+
+1. 电脑/手机连 WiFi `T-2Can_xxxx`，密码 `12345678`；
+2. 打开 <http://192.168.4.1/log>；
+3. 看到 `can a received data`、`can a receive id: 0x123` 和 8 个数据字节，就说明 CANable 发、T-2Can 收成功。
+
+如果网页日志不方便，也可以烧 `examples/can` 或自己写一个只打印 CAN A 的固件。
+
+
 
 - slcan 固件**不对配置命令返回 ACK/NACK**，只有 `V`、`E` 和收到的 CAN 帧会回数据。
 - `E=0` 只代表固件层没有发送失败，**不代表总线上一定有节点 ACK**。
